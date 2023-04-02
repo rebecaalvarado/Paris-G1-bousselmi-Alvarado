@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-#Import the useful databases
 import pandas as pd
 import yfinance as yf
 import matplotlib.pyplot as plt
@@ -86,10 +85,6 @@ for symbol in sorted_returns.index:
 #Add the stock symbols to the legend
 ax.legend()
  
-#Create a canvas for the graph and add it to the Tkinter window
-canvas = FigureCanvasTkAgg(fig, master=root)
-canvas.draw()
-canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
  
 #Define new values for x- and y-axes
 new_xticks = ["Jan17", "Avr17", "Juil17", "Oct17", "Jan18", "Avr18", "Juil18", "Oct18", "Dec18"]
@@ -100,13 +95,71 @@ ax.set_xticklabels(new_xticks)
 ax.set_yticklabels(new_yticks)
  
 ax.set_title("Best returns for 6 randoms of the CAC40 & the Dow Jones")
- 
+
 #The calculatrice value--------------------------------------------------------------------------------------------------------------------------
  
+
+def reset():
+    # Choose 10 companies at random again
+    random_companies_dow_jones = random.sample(list(dow_jones_companies.items()), 6)
+    random_companies_cac40 = random.sample(list(cac40_companies.items()), 6)
+
+    # Store the randomly selected companies in a list
+    stock_symbols = []
+    for company, symbol in random_companies_dow_jones:
+        stock_symbols.append(symbol)
+    stock_symbols2 = []
+    for company, symbol in random_companies_cac40:
+        stock_symbols2.append(symbol)
+
+    # Get the adjusted close prices for each stock during the desired period
+    adj_close_dow_jones = yf.download([symbol for _, symbol in random_companies_dow_jones], start=start_date, end=end_date)["Adj Close"]
+    adj_close_cac40 = yf.download([symbol for _, symbol in random_companies_cac40], start=start_date, end=end_date)["Adj Close"]
+
+    # Calculate the daily returns for each stock
+    daily_returns_dow_jones = adj_close_dow_jones.pct_change()
+    daily_returns_cac40 = adj_close_cac40.pct_change()
+
+    # Calculate the annualized average daily return for each stock
+    annualized_returns_dow_jones = (1 + daily_returns_dow_jones.mean()) ** 252 - 1
+    annualized_returns_cac40 = (1 + daily_returns_cac40.mean()) ** 252 - 1
+
+    # Sort the stocks by their annualized average daily return in descending order
+    sorted_returns_dow_jones = annualized_returns_dow_jones.sort_values(ascending=False)[:3]
+    sorted_returns_cac40 = annualized_returns_cac40.sort_values(ascending=False)[:3]
+    sorted_returns = pd.concat([sorted_returns_dow_jones, sorted_returns_cac40]).sort_values(ascending=False)[:6]
+
+    # Clear the existing plot
+    ax.clear()
+
+    # Create a plot of the adjusted close prices of the 6 best stocks
+    for symbol in sorted_returns.index:
+        if symbol in adj_close_dow_jones.columns:
+            ax.plot(adj_close_dow_jones[symbol], label=symbol + " ({:.2%})".format(sorted_returns[symbol]))
+        else:
+            ax.plot(adj_close_cac40[symbol], label=symbol + " ({:.2%})".format(sorted_returns[symbol]))
+
+    # Set the title and legend of the plot
+    ax.set_title("Adjusted Close Prices of the 6 Best Stocks")
+    ax.legend()
+
+    # Refresh the plot
+    canvas.draw()
+   
+#Create a canvas for the graph and add it to the Tkinter window
+canvas = FigureCanvasTkAgg(fig, master=root)
+canvas.draw()
+canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)  
+
+# Create a Tkinter button to reset the code
+reset_button = tk.Button(root, text="Reset", command=reset)
+reset_button.pack()
+
+
 #Create a canvas for the rectangles and the numbers
-canvas = tk.Canvas(root, width=525, height=525, bg="light grey")
-canvas.pack(fill="both", expand=True)
- 
+canvas1 = tk.Canvas(root, width=525, height=525, bg="light grey")
+canvas1.pack(fill="both", expand=True)
+
 # Define button coordinates and labels
 button_data = [
     (25, 25, 125, 125, "7"),
@@ -129,9 +182,10 @@ button_data = [
  
 # Create buttons
 for x1, y1, x2, y2, label in button_data:
-    rect = canvas.create_rectangle(x1, y1, x2, y2, fill="black")
+    rect = canvas1.create_rectangle(x1, y1, x2, y2, fill="black")
     x_center, y_center = (x1 + x2) / 2, (y1 + y2) / 2
-    canvas.create_text(x_center, y_center, text=label, fill="white", font=("Arial", 40))
+    canvas1.create_text(x_center, y_center, text=label, fill="white", font=("Arial", 40))
  
+
 #Start the Tkinter event loop
 root.mainloop()
