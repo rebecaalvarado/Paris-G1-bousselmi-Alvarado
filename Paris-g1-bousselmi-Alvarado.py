@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+#Import all the databases
 import pandas as pd
 import yfinance as yf
 import matplotlib.pyplot as plt
