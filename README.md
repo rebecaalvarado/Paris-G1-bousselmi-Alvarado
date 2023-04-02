@@ -1,6 +1,6 @@
 # Paris-G1-bousselmi-Alvarado
 
-Rebeca Alvarado / Anthony Abi Nader / Alexandre Coupat / Clément Grootaert / Jeanne Le Naëlou
+#Rebeca Alvarado / Anthony Abi Nader / Alexandre Coupat / Clément Grootaert / Jeanne Le Naëlou
 
 import pandas as pd
 import yfinance as yf
